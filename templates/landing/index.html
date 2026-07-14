@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>EduLib — AI-Powered University Library</title>
+  <meta name="description" content="EduLib: A modern AI-powered library management system for students, teachers and administrators.">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+<!-- ── Navbar ───────────────────────────────────────────── -->
+<nav class="landing-nav">
+  <div class="nav-brand">
+    <div class="nav-brand-icon"><i data-lucide="book-open"></i></div>
+    EduLib
+  </div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#books">Books</a>
+    <a href="#roles">For You</a>
+  </div>
+  <div class="nav-actions">
+    <button id="theme-toggle" class="topbar-icon-btn" title="Toggle theme">
+      <i data-lucide="sun" id="theme-icon"></i>
+    </button>
+    <a href="{{ url_for('auth.login') }}" class="btn btn-ghost btn-sm">Login</a>
+    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Get Started</a>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────── -->
+<section class="hero" style="padding-top:80px;">
+  <div class="hero-orb orb-1"></div>
+  <div class="hero-orb orb-2"></div>
+  <div class="hero-content">
+    <div class="hero-badge" data-aos="fade-down">
+      <span class="chatbot-status"></span> Powered by AI &amp; OpenRouter
+    </div>
+    <h1 data-aos="fade-up" data-aos-delay="100">
+      Your Campus Library,<br><span>Reimagined with AI</span>
+    </h1>
+    <p data-aos="fade-up" data-aos-delay="200">
+      Search books, borrow physical copies, read ebooks online, and get AI-powered recommendations — all in one place.
+    </p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;" data-aos="fade-up" data-aos-delay="300">
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">
+        <i data-lucide="zap"></i> Get Started Free
+      </a>
+      <a href="{{ url_for('books.catalog') }}" class="btn btn-ghost btn-lg">
+        <i data-lucide="book-open"></i> Browse Catalog
+      </a>
+    </div>
+    <div style="display:flex;gap:40px;justify-content:center;margin-top:56px;flex-wrap:wrap;" data-aos="fade-up" data-aos-delay="400">
+      <div class="text-center">
+        <div class="stat-num" style="color:var(--accent-primary);">100+</div>
+        <div style="color:var(--text-muted);font-size:13px;margin-top:6px;font-weight:500;">Books Available</div>
+      </div>
+      <div class="text-center">
+        <div class="stat-num" style="color:var(--success);">Free</div>
+        <div style="color:var(--text-muted);font-size:13px;margin-top:6px;font-weight:500;">E-Books Online</div>
+      </div>
+      <div class="text-center">
+        <div class="stat-num" style="color:var(--warning);">AI</div>
+        <div style="color:var(--text-muted);font-size:13px;margin-top:6px;font-weight:500;">Smart Assistant</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Features ──────────────────────────────────────────── -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2>Everything You Need</h2>
+      <p>A complete library ecosystem built for modern campuses</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;">
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="0">
+        <div class="feature-icon" style="background:rgba(99,102,241,0.15);color:#818cf8;"><i data-lucide="search"></i></div>
+        <h4 style="margin-bottom:10px;font-size:17px;">Smart Search</h4>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.6;">Search our full catalog instantly by title, author, or subject.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="60">
+        <div class="feature-icon" style="background:rgba(236,72,153,0.15);color:#f472b6;"><i data-lucide="bot"></i></div>
+        <h4 style="margin-bottom:10px;font-size:17px;">AI Librarian</h4>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.6;">Get personalized book recommendations powered by AI.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="120">
+        <div class="feature-icon" style="background:rgba(16,185,129,0.15);color:#34d399;"><i data-lucide="book-open"></i></div>
+        <h4 style="margin-bottom:10px;font-size:17px;">E-Book Reader</h4>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.6;">Read and download free ebooks directly in your browser.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="180">
+        <div class="feature-icon" style="background:rgba(245,158,11,0.15);color:#fbbf24;"><i data-lucide="handshake"></i></div>
+        <h4 style="margin-bottom:10px;font-size:17px;">Borrow &amp; Return</h4>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.6;">Request physical books, track approvals and due dates.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="240">
+        <div class="feature-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa;"><i data-lucide="bell"></i></div>
+        <h4 style="margin-bottom:10px;font-size:17px;">Notifications</h4>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.6;">Due date reminders, approval alerts and fine notifications.</p>
+      </div>
+      <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
+        <div class="feature-icon" style="background:rgba(139,92,246,0.15);color:#a78bfa;"><i data-lucide="bar-chart-2"></i></div>
+        <h4 style="margin-bottom:10px;font-size:17px;">Analytics</h4>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.6;">Dashboards with borrowing statistics and reading progress.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Featured Books ─────────────────────────────────────── -->
+{% if featured %}
+<section class="section" id="books" style="background:rgba(255,255,255,0.015);">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2>Featured Books</h2>
+      <p>Discover popular titles from our catalog</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:20px;">
+      {% for book in featured %}
+      <div class="book-card glass-hover" data-aos="fade-up">
+        {% if book.cover_url and book.cover_url != '/static/images/default_book.png' %}
+          <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="book-cover">
+        {% else %}
+          <div class="book-cover-placeholder"><i data-lucide="book"></i></div>
+        {% endif %}
+        <div class="book-meta">
+          <div class="book-title">{{ book.title }}</div>
+          <div class="book-author">{{ book.author }}</div>
+          {% if book.category %}
+            <span class="badge badge-primary" style="margin-top:6px;font-size:11px;">{{ book.category.name }}</span>
+          {% endif %}
+        </div>
+        <div class="book-actions">
+          {% if book.has_ebook %}
+            <a href="{{ url_for('student.read_ebook', bid=book.id) }}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">
+              <i data-lucide="book-open"></i> Read
+            </a>
+          {% endif %}
+          <a href="{{ url_for('books.book_detail', bid=book.id) }}" class="btn btn-ghost btn-sm" style="flex:1;justify-content:center;">
+            <i data-lucide="info"></i> Details
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div style="text-align:center;margin-top:40px;">
+      <a href="{{ url_for('books.catalog') }}" class="btn btn-primary btn-lg">
+        <i data-lucide="globe"></i> Browse Full Catalog
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── Roles ─────────────────────────────────────────────── -->
+<section class="section" id="roles">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2>Built for Everyone</h2>
+      <p>Three tailored dashboards for every role in your institution</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;">
+      <div class="role-card" data-aos="fade-right" style="border-top:3px solid var(--danger);">
+        <div style="font-size:32px;margin-bottom:16px;">🛡️</div>
+        <h3 style="margin-bottom:12px;color:var(--danger);">Admin</h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;color:var(--text-muted);font-size:14px;">
+          <li>✅ Manage all users, books &amp; categories</li>
+          <li>✅ Approve / reject borrow requests</li>
+          <li>✅ Manage overdue fines</li>
+          <li>✅ View analytics &amp; reports</li>
+          <li>✅ Send notifications</li>
+        </ul>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-danger btn-sm" style="margin-top:24px;">Login as Admin →</a>
+      </div>
+      <div class="role-card" data-aos="fade-up" style="border-top:3px solid var(--warning);">
+        <div style="font-size:32px;margin-bottom:16px;">👩‍🏫</div>
+        <h3 style="margin-bottom:12px;color:var(--warning);">Teacher</h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;color:var(--text-muted);font-size:14px;">
+          <li>✅ Add books &amp; course materials</li>
+          <li>✅ Approve student borrow requests</li>
+          <li>✅ View student borrowing history</li>
+          <li>✅ Search Local Catalog</li>
+          <li>✅ AI assistant for resources</li>
+        </ul>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-warning btn-sm" style="margin-top:24px;">Register as Teacher →</a>
+      </div>
+      <div class="role-card" data-aos="fade-left" style="border-top:3px solid var(--accent-primary);">
+        <div style="font-size:32px;margin-bottom:16px;">🎓</div>
+        <h3 style="margin-bottom:12px;color:var(--accent-primary);">Student</h3>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:8px;color:var(--text-muted);font-size:14px;">
+          <li>✅ Search &amp; borrow physical books</li>
+          <li>✅ Read free ebooks online</li>
+          <li>✅ Track reading progress</li>
+          <li>✅ Wishlist &amp; borrow history</li>
+          <li>✅ AI librarian chatbot</li>
+        </ul>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm" style="margin-top:24px;">Register as Student →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── New Arrivals ───────────────────────────────────────── -->
+{% if new_arrivals %}
+<section class="section" style="background:rgba(59,130,246,0.03);">
+  <div class="container">
+    <div class="section-header" data-aos="fade-up">
+      <h2>New Arrivals</h2>
+      <p>Latest additions to our library collection</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">
+      {% for book in new_arrivals %}
+      <div class="glass" style="display:flex;gap:16px;padding:16px;border-radius:var(--radius-lg);" data-aos="fade-up">
+        {% if book.cover_url and book.cover_url != '/static/images/default_book.png' %}
+          <img src="{{ book.cover_url }}" alt="" style="width:60px;height:84px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+        {% else %}
+          <div style="width:60px;height:84px;background:linear-gradient(135deg,rgba(59,130,246,0.3),rgba(6,182,212,0.2));border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="book" style="color:rgba(255,255,255,.5);"></i>
+          </div>
+        {% endif %}
+        <div>
+          <div style="font-weight:600;font-size:15px;line-height:1.3;margin-bottom:4px;">{{ book.title }}</div>
+          <div style="color:var(--text-muted);font-size:13px;margin-bottom:10px;">{{ book.author }}</div>
+          {% if book.has_ebook %}
+            <a href="{{ url_for('student.read_ebook', bid=book.id) }}" class="btn btn-primary btn-sm">
+              <i data-lucide="download"></i> Download
+            </a>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- ── Footer ────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:16px;">
+      <div class="nav-brand-icon" style="width:36px;height:36px;font-size:16px;"><i data-lucide="book-open"></i></div>
+      <strong style="font-family:'Space Grotesk',sans-serif;font-size:20px;">EduLib</strong>
+    </div>
+    <p>&copy; 2026 EduLib — AI-Powered University Library Management System</p>
+    <p style="margin-top:8px;">Built with Flask &amp; OpenRouter AI</p>
+  </div>
+</footer>
+
+<!-- AI Chatbot Widget -->
+<div id="chatbot-widget" class="collapsed">
+  <div class="chatbot-header" id="chatbot-toggle">
+    <div class="chatbot-status"></div>
+    <i data-lucide="bot"></i>
+    <span>AI Librarian</span>
+    <i data-lucide="chevron-up" class="toggle-chevron"></i>
+  </div>
+  <div class="chatbot-body">
+    <div class="chat-messages" id="chat-messages">
+      <div class="message bot-msg">👋 Hi! I'm your AI Librarian. Ask me to recommend books or explain any topic!</div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Ask anything…" autocomplete="off">
+      <button class="btn btn-primary btn-icon" id="chat-send"><i data-lucide="send"></i></button>
+    </div>
+  </div>
+</div>
+
+<div id="flash-container" style="position:fixed;top:88px;right:24px;z-index:999;max-width:340px;"></div>
+
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+function heroSearch() {
+  const q = document.getElementById('hero-search-input');
+  if (q && q.value.trim()) window.location.href = "{{ url_for('books.catalog') }}?q=" + encodeURIComponent(q.value.trim());
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Notifications{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+
+{% block content %}
+{% if notifications %}
+<div style="display:flex;flex-direction:column;gap:.75rem;">
+  {% for n in notifications %}
+  <div class="glass" style="padding:1rem 1.25rem;border-left:4px solid var(--{% if n.type == 'success' %}success{% elif n.type == 'danger' %}danger{% elif n.type == 'warning' %}warning{% else %}info{% endif %});">
+    <div style="display:flex;align-items:center;gap:.75rem;">
+      <div style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(99,102,241,.1);flex-shrink:0;">
+        <i data-lucide="{% if n.type == 'success' %}check-circle{% elif n.type == 'danger' %}exclamation-circle{% elif n.type == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}" style="color:var(--{% if n.type == 'success' %}success{% elif n.type == 'danger' %}danger{% elif n.type == 'warning' %}warning{% else %}info{% endif %});"></i>
+      </div>
+      <div style="flex:1;">
+        <div style="font-weight:600;font-size:.9rem;">{{ n.title }}</div>
+        <div style="font-size:.82rem;color:var(--text-muted);margin-top:.2rem;">{{ n.message }}</div>
+      </div>
+      <div style="font-size:.75rem;color:var(--text-muted);text-align:right;flex-shrink:0;">{{ time_ago(n.created_at) }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state glass" style="padding:4rem;">
+  <i data-lucide="bell-off"></i>
+  <h4>No notifications</h4>
+  <p>You're all caught up! Notifications about borrows, fines, and approvals will appear here.</p>
+</div>
+{% endif %}
+{% endblock %}

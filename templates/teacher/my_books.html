@@ -1,0 +1,32 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}My Books{% endblock %}
+{% block page_title %}Books I've Added{% endblock %}
+
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+  <span style="color:var(--text-muted);font-size:.875rem;">{{ books.total }} book(s) added by you</span>
+  <a href="{{ url_for('teacher.add_book') }}" class="btn btn-primary btn-sm"><i data-lucide="plus"></i> Add Book</a>
+</div>
+<div class="glass">
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Book</th><th>Category</th><th>Available</th><th>Added</th></tr></thead>
+      <tbody>
+        {% for book in books.items %}
+        <tr>
+          <td>
+            <div style="font-weight:600;font-size:.875rem;">{{ book.title }}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">{{ book.author }}</div>
+          </td>
+          <td>{% if book.category %}<span class="badge badge-primary">{{ book.category.name }}</span>{% else %}—{% endif %}</td>
+          <td style="font-size:.85rem;">{{ book.copies_available }}/{{ book.copies_total }}</td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ time_ago(book.created_at) }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4"><div class="empty-state"><i data-lucide="book"></i><p>No books added yet</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

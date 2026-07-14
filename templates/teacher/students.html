@@ -1,0 +1,43 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Students{% endblock %}
+{% block page_title %}Student Directory{% endblock %}
+
+{% block content %}
+<form method="GET" style="margin-bottom:1.25rem;" class="search-box">
+  <i data-lucide="search"></i>
+  <input type="text" name="q" value="{{ q }}" placeholder="Search students…" style="background:transparent;border:none;color:var(--text);flex:1;">
+  <button type="submit" class="btn btn-primary btn-sm">Search</button>
+</form>
+<div class="glass">
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Student</th><th>Student ID</th><th>Borrows</th><th>Joined</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for student in students.items %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              <div class="avatar avatar-sm">{{ student.display_name[0].upper() }}</div>
+              <div>
+                <div style="font-weight:600;font-size:.875rem;">{{ student.display_name }}</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">{{ student.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ student.student_id or '—' }}</td>
+          <td style="font-size:.85rem;">{{ student.active_borrows }}</td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ format_date(student.created_at) }}</td>
+          <td>
+            <a href="{{ url_for('teacher.student_history', uid=student.id) }}" class="btn btn-ghost btn-sm">
+              <i data-lucide="history"></i> History
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5"><div class="empty-state"><i data-lucide="graduation-cap"></i><p>No students found</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

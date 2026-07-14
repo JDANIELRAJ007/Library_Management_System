@@ -1,0 +1,50 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}My History{% endblock %}
+{% block page_title %}Borrow History{% endblock %}
+
+{% block content %}
+<div class="glass">
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Book</th><th>Borrowed</th><th>Due Date</th><th>Returned</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for r in records.items %}
+        <tr>
+          <td>
+            <div style="font-weight:600;font-size:.875rem;">{{ r.book.title }}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">{{ r.book.author }}</div>
+          </td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ format_date(r.borrow_date) }}</td>
+          <td style="font-size:.82rem;">
+            {% if r.due_date %}
+              <span style="color:{% if r.is_overdue %}var(--danger){% else %}var(--text){% endif %};">
+                {{ format_date(r.due_date) }}
+              </span>
+            {% else %}—{% endif %}
+          </td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ format_date(r.return_date) if r.return_date else '—' }}</td>
+          <td>
+            {% if r.status == 'borrowed' and r.is_overdue %}<span class="badge badge-danger">Overdue</span>
+            {% elif r.status == 'borrowed' %}<span class="badge badge-primary">Borrowed</span>
+            {% elif r.status == 'returned' %}<span class="badge badge-success">Returned</span>
+            {% elif r.status == 'requested' %}<span class="badge badge-warning">Pending</span>
+            {% elif r.status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+            {% else %}<span class="badge">{{ r.status }}</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5"><div class="empty-state"><i data-lucide="history"></i><p>No borrow history</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if records.pages > 1 %}
+  <div class="pagination">
+    {% for p in records.iter_pages() %}
+      {% if p %}<a href="?page={{ p }}" class="page-btn {% if p == records.page %}active{% endif %}">{{ p }}</a>
+      {% else %}<span>…</span>{% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

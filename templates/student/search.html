@@ -1,0 +1,142 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Search Books{% endblock %}
+{% block page_title %}Search Books{% endblock %}
+
+{% block content %}
+
+{# ── Search & Filter Bar ──────────────────────────────────── #}
+<div class="glass" style="padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
+  <form method="GET" action="{{ url_for('student.search') }}" id="search-form">
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;">
+      <div style="flex:1;min-width:240px;" class="search-box">
+        <i data-lucide="search"></i>
+        <input type="text" name="q" id="search-input" value="{{ q }}"
+               placeholder="Search by title, author, ISBN, or topic…"
+               style="background:transparent;border:none;color:var(--text);width:100%;padding:.35rem;"
+               autocomplete="off">
+      </div>
+      <select name="category" class="form-control" style="width:auto;min-width:160px;" onchange="this.form.submit()">
+        <option value="">All Categories</option>
+        {% for cat in categories %}
+          <option value="{{ cat.id }}" {% if category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+      <select name="ebook" class="form-control" style="width:auto;" onchange="this.form.submit()">
+        <option value="">All Books</option>
+        <option value="1" {% if has_ebook == '1' %}selected{% endif %}>E-Books Only</option>
+      </select>
+      <button type="submit" class="btn btn-primary"><i data-lucide="search"></i> Search</button>
+      {% if q or category_id or has_ebook %}
+        <a href="{{ url_for('student.search') }}" class="btn btn-ghost btn-sm"><i data-lucide="x"></i> Clear</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+{# ── Result count ─────────────────────────────────────────── #}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+  <div style="color:var(--text-muted);font-size:.875rem;">
+    {% if q %}
+      <strong style="color:var(--text);">{{ total }}</strong> results for "<strong>{{ q }}</strong>"
+    {% else %}
+      Showing <strong style="color:var(--text);">{{ total }}</strong> books
+    {% endif %}
+  </div>
+  <div style="display:flex;gap:.5rem;">
+    <a href="{{ url_for('student.search') }}?ebook=1{% if q %}&q={{ q }}{% endif %}" 
+       class="btn btn-sm {% if has_ebook == '1' %}btn-primary{% else %}btn-ghost{% endif %}">
+      <i data-lucide="book-open"></i> E-Books
+    </a>
+  </div>
+</div>
+
+{# ── Book Grid ────────────────────────────────────────────── #}
+{% if local_books %}
+<div class="grid-books grid">
+  {% for book in local_books %}
+  <div class="book-card glass glass-hover">
+    {% if book.cover_url and book.cover_url != '/static/images/default_book.png' %}
+      <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="book-cover">
+    {% else %}
+      <div class="book-cover-placeholder">
+        <i data-lucide="book" style="color:rgba(255,255,255,.4);"></i>
+      </div>
+    {% endif %}
+
+    <div class="book-meta">
+      <div class="book-title">{{ book.title }}</div>
+      <div class="book-author">{{ book.author }}</div>
+      {% if book.category %}
+        <span class="badge badge-primary" style="font-size:.6rem;margin-top:.2rem;">{{ book.category.name }}</span>
+      {% endif %}
+      <div style="margin-top:auto;padding-top:.5rem;display:flex;flex-wrap:wrap;gap:.25rem;">
+        {% if book.is_available %}
+          <span class="badge badge-success">{{ book.copies_available }} left</span>
+        {% else %}
+          <span class="badge badge-danger">Out of stock</span>
+        {% endif %}
+        {% if book.has_ebook %}
+          <span class="badge badge-info"><i data-lucide="file-text" style="font-size:.6rem;"></i> PDF</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="book-actions">
+      {% if book.has_ebook %}
+        <a href="{{ url_for('student.read_ebook', bid=book.id) }}"
+           class="btn btn-success btn-sm" style="flex:1;justify-content:center;"
+           title="Read Online">
+          <i data-lucide="book-open-check"></i> Read Online
+        </a>
+      {% endif %}
+      {% if book.is_available %}
+        <form method="POST" action="{{ url_for('student.borrow_book', bid=book.id) }}" style="flex:1;">
+          <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;">
+            <i data-lucide="heart-handshake"></i> Borrow
+          </button>
+        </form>
+      {% endif %}
+      <form method="POST" action="{{ url_for('student.toggle_wishlist', bid=book.id) }}" style="flex:1;">
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center;" title="Save to Wishlist">
+          <i data-lucide="heart"></i> Wishlist
+        </button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{# ── Pagination ───────────────────────────────────────────── #}
+{% if paginated.pages > 1 %}
+<div class="pagination" style="margin-top:2rem;">
+  {% if paginated.has_prev %}
+    <a href="?q={{ q }}&category={{ category_id }}&ebook={{ has_ebook }}&page={{ paginated.prev_num }}" class="page-btn">
+      <i data-lucide="chevron-left"></i>
+    </a>
+  {% endif %}
+  {% for p in paginated.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+    {% if p %}
+      <a href="?q={{ q }}&category={{ category_id }}&ebook={{ has_ebook }}&page={{ p }}"
+         class="page-btn {% if p == page %}active{% endif %}">{{ p }}</a>
+    {% else %}
+      <span style="color:var(--text-muted);padding:0 .25rem;">…</span>
+    {% endif %}
+  {% endfor %}
+  {% if paginated.has_next %}
+    <a href="?q={{ q }}&category={{ category_id }}&ebook={{ has_ebook }}&page={{ paginated.next_num }}" class="page-btn">
+      <i data-lucide="chevron-right"></i>
+    </a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% else %}
+<div class="empty-state glass" style="padding:5rem;">
+  <i data-lucide="search"></i>
+  <h4>No books found</h4>
+  <p>{% if q %}Try different keywords or {% endif %}browse all categories.</p>
+  {% if q %}<a href="{{ url_for('student.search') }}" class="btn btn-primary" style="margin-top:1rem;">Show All Books</a>{% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

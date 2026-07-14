@@ -1,0 +1,47 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}My Wishlist{% endblock %}
+{% block page_title %}My Wishlist{% endblock %}
+
+{% block content %}
+{% if items %}
+<div class="grid-books grid">
+  {% for w in items %}
+  <div class="book-card glass glass-hover">
+    {% if w.book.cover_url and w.book.cover_url != '/static/images/default_book.png' %}
+      <img src="{{ w.book.cover_url }}" alt="{{ w.book.title }}" class="book-cover">
+    {% else %}
+      <div class="book-cover-placeholder"><i data-lucide="book"></i></div>
+    {% endif %}
+    <div class="book-meta">
+      <div class="book-title">{{ w.book.title }}</div>
+      <div class="book-author">{{ w.book.author }}</div>
+      <div style="margin-top:auto;padding-top:.5rem;">
+        {% if w.book.is_available %}
+          <span class="badge badge-success">Available</span>
+        {% else %}
+          <span class="badge badge-danger">Unavailable</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="book-actions">
+      {% if w.book.is_available %}
+      <form method="POST" action="{{ url_for('student.borrow_book', bid=w.book_id) }}" style="flex:1;">
+        <button class="btn btn-primary btn-sm w-full" style="justify-content:center;"><i data-lucide="heart-handshake"></i> Borrow</button>
+      </form>
+      {% endif %}
+      <form method="POST" action="{{ url_for('student.toggle_wishlist', bid=w.book_id) }}">
+        <button class="btn btn-danger btn-icon btn-sm" title="Remove from wishlist"><i data-lucide="trash"></i></button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state glass" style="padding:4rem;">
+  <i data-lucide="heart"></i>
+  <h4>Your wishlist is empty</h4>
+  <p>Browse books and add them to your wishlist to save for later</p>
+  <a href="{{ url_for('student.search') }}" class="btn btn-primary" style="margin-top:1rem;"><i data-lucide="search"></i> Browse Books</a>
+</div>
+{% endif %}
+{% endblock %}

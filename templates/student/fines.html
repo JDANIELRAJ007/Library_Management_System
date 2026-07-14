@@ -1,0 +1,49 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}My Fines{% endblock %}
+{% block page_title %}My Fines{% endblock %}
+
+{% block content %}
+{% set total_unpaid = fines | selectattr('paid','eq',false) | sum(attribute='amount') %}
+{% if total_unpaid > 0 %}
+<div class="alert alert-danger" style="margin-bottom:1.5rem;">
+  ⚠️ You have unpaid fines totaling <strong>₹{{ "%.0f"|format(total_unpaid) }}</strong>. Please pay at the library counter.
+</div>
+{% endif %}
+
+<div class="glass">
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Reason</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for fine in fines %}
+        <tr>
+          <td style="font-size:.875rem;">{{ fine.reason }}</td>
+          <td><strong style="color:{% if fine.paid %}var(--success){% else %}var(--danger){% endif %};">₹{{ "%.0f"|format(fine.amount) }}</strong></td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ format_date(fine.created_at) }}</td>
+          <td>
+            {% if fine.paid %}
+              <span class="badge badge-success">Paid on {{ format_date(fine.paid_at) }}</span>
+            {% else %}
+              <form action="{{ url_for('student.pay_fine', fid=fine.id) }}" method="POST">
+                <script src="https://checkout.razorpay.com/v1/checkout.js"
+                        data-key="{{ razorpay_key }}"
+                        data-amount="{{ (fine.amount * 100)|int }}"
+                        data-currency="INR"
+                        data-name="EduLib Fines"
+                        data-description="{{ fine.reason }}"
+                        data-prefill.name="{{ current_user.display_name }}"
+                        data-prefill.email="{{ current_user.email }}"
+                        data-theme.color="#6366f1">
+                </script>
+              </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4"><div class="empty-state"><i data-lucide="smile"></i><p>No fines — great record!</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

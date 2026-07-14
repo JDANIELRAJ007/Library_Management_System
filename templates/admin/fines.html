@@ -1,0 +1,77 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Fines{% endblock %}
+{% block page_title %}Fine Management{% endblock %}
+
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+  <div style="display:flex;gap:.5rem;">
+    <a href="{{ url_for('admin.fines') }}" class="btn {% if not paid %}btn-primary{% else %}btn-ghost{% endif %} btn-sm">All Fines</a>
+    <a href="{{ url_for('admin.fines', paid='0') }}" class="btn {% if paid == '0' %}btn-danger{% else %}btn-ghost{% endif %} btn-sm">Unpaid</a>
+    <a href="{{ url_for('admin.fines', paid='1') }}" class="btn {% if paid == '1' %}btn-success{% else %}btn-ghost{% endif %} btn-sm">Paid</a>
+  </div>
+  <form method="POST" action="{{ url_for('admin.calculate_fines') }}">
+    <button type="submit" class="btn btn-warning btn-sm" title="Scan active borrows and apply late fines"><i data-lucide="refresh-cw"></i> Calculate Fines</button>
+  </form>
+</div>
+
+<div class="glass" style="margin-bottom: 1.5rem; padding: 1rem; display: flex; align-items: center; justify-content: space-between;">
+  <div>
+    <h4 style="margin: 0;">Fine Settings</h4>
+    <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Set the grace period after which fines start applying.</p>
+  </div>
+  <form method="POST" action="{{ url_for('admin.set_fine_settings') }}" style="display: flex; gap: 0.5rem; align-items: center;">
+    <select name="due_time" class="form-control" style="width: 150px;">
+      <option value="1m" {% if due_setting == '1m' %}selected{% endif %}>1 Minute</option>
+      <option value="10h" {% if due_setting == '10h' %}selected{% endif %}>10 Hours</option>
+      <option value="1d" {% if due_setting == '1d' %}selected{% endif %}>1 Day</option>
+      <option value="7d" {% if due_setting == '7d' %}selected{% endif %}>7 Days</option>
+    </select>
+    <button type="submit" class="btn btn-primary btn-sm">Save Settings</button>
+  </form>
+</div>
+<div class="glass">
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Student</th><th>Reason</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for fine in fines.items %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:.6rem;">
+              <div class="avatar avatar-sm">{{ fine.user.display_name[0].upper() }}</div>
+              <div>
+                <div style="font-weight:600;font-size:.85rem;">{{ fine.user.display_name }}</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">{{ fine.user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:.82rem;">{{ fine.reason }}</td>
+          <td><strong style="color:var(--danger);">₹{{ "%.0f"|format(fine.amount) }}</strong></td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ format_date(fine.created_at) }}</td>
+          <td>
+            {% if fine.paid %}<span class="badge badge-success">Paid</span>
+            {% else %}<span class="badge badge-danger">Unpaid</span>{% endif %}
+          </td>
+          <td>
+            {% if not fine.paid %}
+            <form method="POST" action="{{ url_for('admin.mark_fine_paid', fid=fine.id) }}" data-confirm="Mark fine as paid?">
+              <button class="btn btn-success btn-sm"><i data-lucide="check"></i> Mark Paid</button>
+            </form>
+            {% else %}
+              <div style="color:var(--text-muted);font-size:.78rem; display:flex; flex-direction:column; gap:0.2rem;">
+                <span>{{ format_date(fine.paid_at) }}</span>
+                {% if fine.razorpay_payment_id %}
+                <span class="badge badge-info" style="font-size:0.7rem;">Razorpay: {{ fine.razorpay_payment_id }}</span>
+                {% endif %}
+              </div>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty-state"><i data-lucide="smile"></i><p>No fines found</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

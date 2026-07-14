@@ -1,0 +1,193 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}My Dashboard{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- ── Welcome Banner ── -->
+<div class="glass" style="padding:24px 28px;margin-bottom:24px;background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(139,92,246,0.08));border-color:rgba(59,130,246,0.2);">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+    <div>
+      <h2 style="font-family:'Space Grotesk',sans-serif;font-size:22px;margin-bottom:6px;">
+        👋 Hello, {{ current_user.display_name }}!
+      </h2>
+      <p style="color:var(--text-muted);font-size:14px;">
+        <span style="color:var(--accent-primary);font-weight:600;font-family:'JetBrains Mono',monospace;">{{ active_borrows|length }}</span> active borrows ·
+        <span style="color:var(--warning);font-weight:600;font-family:'JetBrains Mono',monospace;">{{ pending }}</span> pending
+        {% if overdue %} · <span style="color:var(--danger);font-weight:600;font-family:'JetBrains Mono',monospace;">{{ overdue|length }}</span> overdue{% endif %}
+      </p>
+    </div>
+    <div style="display:flex;gap:12px;">
+      <a href="{{ url_for('student.search') }}" class="btn btn-primary">
+        <i data-lucide="search"></i> Browse Library
+      </a>
+      <a href="{{ url_for('student.search') }}?ebook=1" class="btn btn-ghost">
+        <i data-lucide="download"></i> E-Books
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ── Alerts ── -->
+{% if unpaid_fines > 0 %}
+<div class="alert alert-danger" style="margin-bottom:16px;position:relative;">
+  ⚠️ You have pending fines of <strong>₹{{ "%.0f"|format(unpaid_fines) }}</strong>.
+  <a href="{{ url_for('student.fines') }}" style="color:inherit;font-weight:700;margin-left:8px;">View Fines →</a>
+</div>
+{% endif %}
+{% if overdue %}
+<div class="alert alert-warning" style="margin-bottom:20px;position:relative;">
+  🔴 <strong>{{ overdue|length }} book(s) overdue!</strong> Please return them to avoid additional fines.
+</div>
+{% endif %}
+
+<!-- ── Stats ── -->
+<div class="grid grid-4" style="margin-bottom:24px;">
+  <div class="stat-card glass glass-hover">
+    <div class="stat-icon" style="background:rgba(59,130,246,0.12);color:#60a5fa;"><i data-lucide="book-open"></i></div>
+    <div><div class="stat-value text-number">{{ active_borrows|length }}</div><div class="stat-label">Active Borrows</div></div>
+  </div>
+  <div class="stat-card glass glass-hover">
+    <div class="stat-icon" style="background:rgba(245,158,11,0.12);color:#fbbf24;"><i data-lucide="clock"></i></div>
+    <div><div class="stat-value text-number">{{ pending }}</div><div class="stat-label">Pending</div></div>
+  </div>
+  <div class="stat-card glass glass-hover">
+    <div class="stat-icon" style="background:rgba(34,197,94,0.12);color:#4ade80;"><i data-lucide="heart"></i></div>
+    <div><div class="stat-value text-number">{{ wishlist|length }}</div><div class="stat-label">Wishlist</div></div>
+  </div>
+  <div class="stat-card glass glass-hover">
+    <div class="stat-icon" style="background:rgba(239,68,68,0.12);color:#f87171;"><i data-lucide="indian-rupee"></i></div>
+    <div><div class="stat-value text-number">₹{{ "%.0f"|format(unpaid_fines) }}</div><div class="stat-label">Pending Fines</div></div>
+  </div>
+</div>
+
+<!-- ── Currently Borrowed + Notifications ── -->
+<div class="grid grid-2" style="margin-bottom:24px;">
+  <div class="glass" style="padding:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 style="font-family:'Space Grotesk',sans-serif;font-size:16px;">Currently Borrowed</h3>
+      <a href="{{ url_for('student.history') }}" class="btn btn-ghost btn-sm">History <i data-lucide="arrow-right"></i></a>
+    </div>
+    {% if active_borrows or pending_requests %}
+      {% for r in active_borrows %}
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--glass-border);">
+        <div style="width:36px;height:50px;background:linear-gradient(135deg,rgba(59,130,246,0.3),rgba(139,92,246,0.2));border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="book" style="color:rgba(255,255,255,0.6);"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.book.title }}</div>
+          <div style="font-size:12px;color:var(--text-muted);">Due: {{ format_date(r.due_date) }}</div>
+        </div>
+        {% if r.is_overdue %}
+          <span class="badge badge-danger">Overdue {{ r.overdue_days }}d</span>
+        {% else %}
+          <span class="badge badge-success">Active</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% for r in pending_requests %}
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--glass-border);opacity:0.8;">
+        <div style="width:36px;height:50px;background:rgba(245,158,11,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i data-lucide="clock" style="color:#fbbf24;"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.book.title }}</div>
+          <div style="font-size:12px;color:var(--text-muted);">Requested: {{ format_date(r.borrow_date) }}</div>
+        </div>
+        <span class="badge badge-warning">Awaiting</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state" style="padding:40px 20px;">
+        <i data-lucide="book"></i><p>No active borrows</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="glass" style="padding:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <h3 style="font-family:'Space Grotesk',sans-serif;font-size:16px;">Notifications</h3>
+      <a href="{{ url_for('student.notifications') }}" class="btn btn-ghost btn-sm">View All <i data-lucide="arrow-right"></i></a>
+    </div>
+    {% if notifications %}
+      {% for n in notifications %}
+      <div style="padding:12px;border-radius:var(--radius-md);background:rgba(255,255,255,0.03);margin-bottom:8px;border-left:3px solid var(--{{ 'success' if n.type == 'success' else 'danger' if n.type == 'danger' else 'warning' if n.type == 'warning' else 'accent-secondary' }});">
+        <div style="font-size:13px;font-weight:600;margin-bottom:2px;">{{ n.title }}</div>
+        <div style="font-size:12px;color:var(--text-muted);">{{ n.message[:80] }}{% if n.message|length > 80 %}…{% endif %}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state" style="padding:40px 20px;">
+        <i data-lucide="bell-off"></i><p>No new notifications</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ── Newly Added Books ── -->
+<div class="glass" style="padding:24px;margin-bottom:24px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:16px;">Newly Added Books</h3>
+    <a href="{{ url_for('student.search') }}" class="btn btn-ghost btn-sm">Browse All <i data-lucide="arrow-right"></i></a>
+  </div>
+  <div class="grid-books grid">
+    {% for book in new_arrivals %}
+    <div class="book-card glass-hover">
+      {% if book.cover_url and book.cover_url != '/static/images/default_book.png' %}
+        <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="book-cover">
+      {% else %}
+        <div class="book-cover-placeholder"><i data-lucide="book"></i></div>
+      {% endif %}
+      <div class="book-meta">
+        <div class="book-title">{{ book.title }}</div>
+        <div class="book-author">{{ book.author }}</div>
+        {% if book.has_ebook %}
+          <span class="badge badge-info" style="margin-top:6px;"><i data-lucide="file-text"></i> PDF</span>
+        {% endif %}
+      </div>
+      <div class="book-actions">
+        {% if book.has_ebook %}
+          <a href="{{ url_for('student.read_ebook', bid=book.id) }}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">
+            <i data-lucide="book-open"></i>
+          </a>
+        {% endif %}
+        {% if book.is_available %}
+          <form method="POST" action="{{ url_for('student.borrow_book', bid=book.id) }}" style="flex:1;">
+            <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;">Borrow</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ── Wishlist Preview ── -->
+{% if wishlist %}
+<div class="glass" style="padding:24px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <h3 style="font-family:'Space Grotesk',sans-serif;font-size:16px;">❤️ My Wishlist</h3>
+    <a href="{{ url_for('student.wishlist') }}" class="btn btn-ghost btn-sm">View All <i data-lucide="arrow-right"></i></a>
+  </div>
+  <div style="display:grid;gap:8px;">
+    {% for w in wishlist[:4] %}
+    <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:var(--radius-md);background:rgba(255,255,255,0.03);border:1px solid var(--glass-border);">
+      <div style="width:30px;height:42px;background:linear-gradient(135deg,rgba(59,130,246,0.25),rgba(139,92,246,0.15));border-radius:4px;flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ w.book.title }}</div>
+        <div style="font-size:12px;color:var(--text-muted);">{{ w.book.author }}</div>
+      </div>
+      {% if w.book.is_available %}
+        <form method="POST" action="{{ url_for('student.borrow_book', bid=w.book_id) }}">
+          <button class="btn btn-primary btn-sm">Borrow</button>
+        </form>
+      {% else %}
+        <span class="badge badge-danger">Unavailable</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

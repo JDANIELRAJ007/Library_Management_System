@@ -1,0 +1,39 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Library Reports{% endblock %}
+
+{% block content %}
+<div class="grid grid-2">
+  <div class="glass" style="padding:1.5rem;">
+    <h3 style="font-size:1rem;margin-bottom:1rem;">📚 Most Borrowed Books</h3>
+    {% for book in top_books %}
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border);">
+      <div style="width:32px;height:42px;background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:4px;flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ book.title }}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);">{{ book.author }}</div>
+      </div>
+      <span class="badge badge-primary">{{ book.times_borrowed }} borrows</span>
+    </div>
+    {% else %}
+    <div class="empty-state"><i data-lucide="book"></i><p>No borrow data yet</p></div>
+    {% endfor %}
+  </div>
+
+  <div class="glass" style="padding:1.5rem;">
+    <h3 style="font-size:1rem;margin-bottom:1rem;">👥 Most Active Borrowers</h3>
+    {% for user, count in top_borrowers %}
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border);">
+      <div class="avatar avatar-sm">{{ user.display_name[0].upper() }}</div>
+      <div style="flex:1;">
+        <div style="font-size:.875rem;font-weight:600;">{{ user.display_name }}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);">{{ user.role }}</div>
+      </div>
+      <span class="badge badge-success">{{ count }} books</span>
+    </div>
+    {% else %}
+    <div class="empty-state"><i data-lucide="users"></i><p>No data yet</p></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}{{ student.display_name }} History{% endblock %}
+{% block page_title %}{{ student.display_name }}'s Borrow History{% endblock %}
+
+{% block content %}
+<div class="glass" style="padding:1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;">
+  <div class="avatar avatar-md">{{ student.display_name[0].upper() }}</div>
+  <div>
+    <h3 style="font-size:1rem;">{{ student.display_name }}</h3>
+    <div style="font-size:.82rem;color:var(--text-muted);">{{ student.email }} · Student ID: {{ student.student_id or '—' }}</div>
+  </div>
+  <div style="margin-left:auto;">
+    <span class="badge badge-primary">{{ records|length }} records</span>
+  </div>
+</div>
+<div class="glass">
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Book</th><th>Borrowed</th><th>Due Date</th><th>Returned</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td>
+            <div style="font-weight:600;font-size:.875rem;">{{ r.book.title }}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">{{ r.book.author }}</div>
+          </td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ format_date(r.borrow_date) }}</td>
+          <td style="font-size:.82rem;">{{ format_date(r.due_date) if r.due_date else '—' }}</td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ format_date(r.return_date) if r.return_date else '—' }}</td>
+          <td>
+            {% if r.status == 'borrowed' and r.is_overdue %}<span class="badge badge-danger">Overdue</span>
+            {% elif r.status == 'borrowed' %}<span class="badge badge-primary">Borrowed</span>
+            {% elif r.status == 'returned' %}<span class="badge badge-success">Returned</span>
+            {% elif r.status == 'requested' %}<span class="badge badge-warning">Pending</span>
+            {% else %}<span class="badge">{{ r.status }}</span>{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5"><div class="empty-state"><i data-lucide="history"></i><p>No records for this student</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

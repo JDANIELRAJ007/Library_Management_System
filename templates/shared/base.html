@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}EduLib{% endblock %} — AI Library</title>
+  <meta name="description" content="{% block meta_desc %}EduLib: AI-powered university library management system{% endblock %}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- AOS -->
+  <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+{% block body %}{% endblock %}
+
+<!-- ── AI Chatbot Widget ───────────────────────────────── -->
+<div id="chatbot-widget" class="collapsed">
+  <div class="chatbot-header" id="chatbot-toggle">
+    <div class="chatbot-status"></div>
+    <i data-lucide="bot"></i>
+    <span>AI Librarian</span>
+    <i data-lucide="chevron-up" class="toggle-chevron"></i>
+  </div>
+  <div class="chatbot-body">
+    <div class="chat-messages" id="chat-messages">
+      <div class="message bot-msg">
+        👋 Hi! I'm your AI Librarian. Ask me to recommend books, explain topics, or help with library questions!
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chat-input" placeholder="Ask anything…" autocomplete="off">
+      <button class="btn btn-primary btn-icon" id="chat-send"><i data-lucide="send"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+<div id="flash-container" style="position:fixed;top:80px;right:24px;z-index:999;max-width:340px;">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }} alert-dismissible" style="margin-bottom:.5rem;">
+        {{ message }}
+        <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+      </div>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

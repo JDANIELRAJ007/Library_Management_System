@@ -1,0 +1,27 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}My Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div style="max-width:560px;">
+  <div class="glass" style="padding:2rem;">
+    <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:2rem;">
+      <div class="avatar avatar-lg" style="font-size:2rem;">{{ current_user.display_name[0].upper() }}</div>
+      <div>
+        <h3>{{ current_user.display_name }}</h3>
+        <span class="badge badge-warning">teacher</span>
+        <div style="font-size:.8rem;color:var(--text-muted);margin-top:.4rem;">{{ current_user.department or 'No department set' }}</div>
+      </div>
+    </div>
+    <form method="POST" action="{{ url_for('teacher.profile') }}">
+      <div class="form-group"><label class="form-label">Full Name</label><input type="text" name="full_name" class="form-control" value="{{ current_user.full_name or '' }}"></div>
+      <div class="form-group"><label class="form-label">Department</label><input type="text" name="department" class="form-control" value="{{ current_user.department or '' }}"></div>
+      <div class="form-group"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control" value="{{ current_user.phone or '' }}"></div>
+      <div class="form-group"><label class="form-label">Bio</label><textarea name="bio" class="form-control" rows="3">{{ current_user.bio or '' }}</textarea></div>
+      <div class="divider"></div>
+      <div class="form-group"><label class="form-label">New Password</label><input type="password" name="new_password" class="form-control" placeholder="Leave blank to keep current"></div>
+      <button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Save Changes</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

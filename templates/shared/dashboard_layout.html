@@ -1,0 +1,166 @@
+{% extends 'shared/base.html' %}
+{% block body %}
+
+<div class="app-layout">
+
+  <!-- ── Sidebar ───────────────────────────────────────────── -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon"><i data-lucide="book-open"></i></div>
+      EduLib
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section">Main</div>
+
+      {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+          <i data-lucide="layout-dashboard"></i> Dashboard
+        </a>
+        <a href="{{ url_for('admin.users') }}" class="sidebar-item {% if request.endpoint == 'admin.users' %}active{% endif %}">
+          <i data-lucide="users"></i> Users
+        </a>
+        <a href="{{ url_for('admin.books') }}" class="sidebar-item {% if request.endpoint == 'admin.books' %}active{% endif %}">
+          <i data-lucide="library"></i> Books
+        </a>
+        <a href="{{ url_for('admin.add_book') }}" class="sidebar-item {% if request.endpoint == 'admin.add_book' %}active{% endif %}">
+          <i data-lucide="plus-circle"></i> Add Book
+        </a>
+        <a href="{{ url_for('admin.categories') }}" class="sidebar-item {% if request.endpoint == 'admin.categories' %}active{% endif %}">
+          <i data-lucide="tags"></i> Categories
+        </a>
+        <div class="sidebar-section">Operations</div>
+        <a href="{{ url_for('admin.scanner') }}" class="sidebar-item {% if request.endpoint == 'admin.scanner' %}active{% endif %}">
+          <i data-lucide="scan-line"></i> Book Scanner
+        </a>
+        <a href="{{ url_for('admin.borrow_requests') }}" class="sidebar-item {% if request.endpoint == 'admin.borrow_requests' %}active{% endif %}">
+          <i data-lucide="git-pull-request"></i> Borrow Requests
+          {% set pr = pending_req_count|default(0) %}{% if pr > 0 %}<span class="badge-count">{{ pr }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('admin.fines') }}" class="sidebar-item {% if request.endpoint == 'admin.fines' %}active{% endif %}">
+          <i data-lucide="indian-rupee"></i> Fines
+        </a>
+        <a href="{{ url_for('admin.reports') }}" class="sidebar-item {% if request.endpoint == 'admin.reports' %}active{% endif %}">
+          <i data-lucide="bar-chart-2"></i> Reports
+        </a>
+
+      {% elif current_user.role == 'teacher' %}
+        <a href="{{ url_for('teacher.dashboard') }}" class="sidebar-item {% if request.endpoint == 'teacher.dashboard' %}active{% endif %}">
+          <i data-lucide="layout-dashboard"></i> Dashboard
+        </a>
+        <a href="{{ url_for('teacher.requests') }}" class="sidebar-item {% if request.endpoint == 'teacher.requests' %}active{% endif %}">
+          <i data-lucide="git-pull-request"></i> Borrow Requests
+        </a>
+        <a href="{{ url_for('teacher.my_books') }}" class="sidebar-item {% if request.endpoint == 'teacher.my_books' %}active{% endif %}">
+          <i data-lucide="library"></i> My Books
+        </a>
+        <a href="{{ url_for('teacher.add_book') }}" class="sidebar-item {% if request.endpoint == 'teacher.add_book' %}active{% endif %}">
+          <i data-lucide="plus-circle"></i> Add Book
+        </a>
+        <a href="{{ url_for('teacher.search_books') }}" class="sidebar-item {% if request.endpoint == 'teacher.search_books' %}active{% endif %}">
+          <i data-lucide="search"></i> Search Catalog
+        </a>
+        <div class="sidebar-section">Students</div>
+        <a href="{{ url_for('teacher.students') }}" class="sidebar-item {% if request.endpoint == 'teacher.students' %}active{% endif %}">
+          <i data-lucide="graduation-cap"></i> Students
+        </a>
+        <a href="{{ url_for('teacher.profile') }}" class="sidebar-item {% if request.endpoint == 'teacher.profile' %}active{% endif %}">
+          <i data-lucide="user-cog"></i> Profile
+        </a>
+
+      {% else %}
+        <a href="{{ url_for('student.dashboard') }}" class="sidebar-item {% if request.endpoint == 'student.dashboard' %}active{% endif %}">
+          <i data-lucide="layout-dashboard"></i> Dashboard
+        </a>
+        <a href="{{ url_for('student.search') }}" class="sidebar-item {% if request.endpoint == 'student.search' and not request.args.get('ebook') %}active{% endif %}">
+          <i data-lucide="search"></i> Search Books
+        </a>
+        <a href="{{ url_for('student.search') }}?ebook=1" class="sidebar-item {% if request.args.get('ebook') == '1' %}active{% endif %}">
+          <i data-lucide="file-text"></i> E-Library
+        </a>
+        <a href="{{ url_for('student.wishlist') }}" class="sidebar-item {% if request.endpoint == 'student.wishlist' %}active{% endif %}">
+          <i data-lucide="heart"></i> Wishlist
+        </a>
+        <div class="sidebar-section">Account</div>
+        <a href="{{ url_for('student.history') }}" class="sidebar-item {% if request.endpoint == 'student.history' %}active{% endif %}">
+          <i data-lucide="clock"></i> Borrow History
+        </a>
+        <a href="{{ url_for('student.fines') }}" class="sidebar-item {% if request.endpoint == 'student.fines' %}active{% endif %}">
+          <i data-lucide="indian-rupee"></i> My Fines
+        </a>
+        <a href="{{ url_for('student.notifications') }}" class="sidebar-item {% if request.endpoint == 'student.notifications' %}active{% endif %}">
+          <i data-lucide="bell"></i> Notifications
+        </a>
+        <a href="{{ url_for('student.profile') }}" class="sidebar-item {% if request.endpoint == 'student.profile' %}active{% endif %}">
+          <i data-lucide="user-cog"></i> Profile
+        </a>
+      {% endif %}
+
+      <div class="sidebar-section">Library</div>
+      <a href="{{ url_for('books.catalog') }}" class="sidebar-item {% if request.endpoint and request.endpoint.startswith('books.') %}active{% endif %}">
+        <i data-lucide="globe"></i> Public Catalog
+      </a>
+      <a href="{{ url_for('landing.index') }}" class="sidebar-item">
+        <i data-lucide="external-link"></i> Home Page
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ current_user.display_name[0].upper() }}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="sidebar-username" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ current_user.display_name }}</div>
+          <div class="sidebar-role">{{ current_user.role }}</div>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" style="color:var(--text-muted);flex-shrink:0;" title="Logout">
+          <i data-lucide="log-out"></i>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ─────────────────────────────────────── -->
+  <div class="main-content">
+    <!-- Topbar -->
+    <div class="topbar">
+      <button class="topbar-icon-btn" id="sidebar-toggle" aria-label="Toggle sidebar">
+        <i data-lucide="menu"></i>
+      </button>
+      <span class="topbar-title">{% block page_title %}{% endblock %}</span>
+      <div class="topbar-actions">
+        <button class="topbar-icon-btn" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
+          <i data-lucide="sun"></i>
+        </button>
+        {% if current_user.role == 'student' %}
+        <a href="{{ url_for('student.notifications') }}" class="topbar-icon-btn" title="Notifications" style="position:relative;">
+          <i data-lucide="bell"></i>
+          <span class="notif-dot" id="notif-dot" style="display:none;"></span>
+        </a>
+        {% endif %}
+        <div class="sidebar-avatar" style="width:36px;height:36px;font-size:14px;cursor:default;" title="{{ current_user.display_name }}">
+          {{ current_user.display_name[0].upper() }}
+        </div>
+      </div>
+    </div>
+
+    <div class="page-content">
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" style="margin-bottom:16px;position:relative;">
+            {{ message }}
+            <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+          </div>
+        {% endfor %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+{% endblock %}

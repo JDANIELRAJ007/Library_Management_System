@@ -1,0 +1,139 @@
+{% extends 'shared/base.html' %}
+{% block title %}Book Catalog{% endblock %}
+{% block body %}
+
+<div style="min-height:100vh;display:flex;flex-direction:column;">
+
+  <!-- ── Catalog Navbar ── -->
+  <div class="catalog-nav">
+    <a href="{{ url_for('landing.index') }}" style="display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">
+      <i data-lucide="book-open" style="color:var(--accent-primary);"></i> EduLib
+    </a>
+    <span style="color:var(--glass-border);">/</span>
+    <span style="font-size:14px;color:var(--text-muted);">Catalog</span>
+    <div style="margin-left:auto;display:flex;gap:12px;align-items:center;">
+      <button id="theme-toggle" class="topbar-icon-btn" title="Toggle theme"><i data-lucide="sun"></i></button>
+      {% if current_user.is_authenticated %}
+        {% if current_user.role == 'admin' %}
+          <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-sm">Dashboard</a>
+        {% elif current_user.role == 'teacher' %}
+          <a href="{{ url_for('teacher.dashboard') }}" class="btn btn-primary btn-sm">Dashboard</a>
+        {% else %}
+          <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary btn-sm">Dashboard</a>
+        {% endif %}
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn btn-ghost btn-sm">Login</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Join Free</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="catalog-content">
+    <!-- ── Search & Filters ── -->
+    <div class="glass" style="padding:20px 24px;margin-bottom:24px;">
+      <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <div class="search-box" style="flex:1;min-width:220px;">
+          <i data-lucide="search"></i>
+          <input type="text" name="q" value="{{ q }}" placeholder="Search by title, author, ISBN…">
+        </div>
+        <select name="category" class="form-control" style="width:auto;min-width:170px;" onchange="this.form.submit()">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary"><i data-lucide="search"></i> Search</button>
+        {% if q or category_id %}
+          <a href="{{ url_for('books.catalog') }}" class="btn btn-ghost btn-sm"><i data-lucide="x"></i> Clear</a>
+        {% endif %}
+      </form>
+    </div>
+
+    <!-- ── Results count ── -->
+    <div style="color:var(--text-muted);font-size:14px;margin-bottom:16px;">
+      Showing <strong style="color:var(--text-primary);font-family:'JetBrains Mono',monospace;">{{ total }}</strong> books{% if q %} for "{{ q }}"{% endif %}
+    </div>
+
+    <!-- ── Book Grid ── -->
+    <div class="grid-books grid">
+      {% for book in books %}
+      <div class="book-card glass glass-hover">
+        {% if book.cover_url and book.cover_url != '/static/images/default_book.png' %}
+          <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="book-cover">
+        {% else %}
+          <div class="book-cover-placeholder"><i data-lucide="book"></i></div>
+        {% endif %}
+        <div class="book-meta">
+          <div class="book-title">{{ book.title }}</div>
+          <div class="book-author">{{ book.author }}</div>
+          {% if book.category %}
+            <span class="badge badge-primary" style="margin-top:6px;font-size:11px;">{{ book.category.name }}</span>
+          {% endif %}
+          <div style="margin-top:auto;padding-top:10px;display:flex;gap:6px;flex-wrap:wrap;">
+            {% if book.is_available %}
+              <span class="badge badge-success">{{ book.copies_available }} available</span>
+            {% else %}
+              <span class="badge badge-danger">Unavailable</span>
+            {% endif %}
+            {% if book.has_ebook %}
+              <span class="badge badge-info"><i data-lucide="file-text"></i> PDF</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="book-actions">
+          {% if book.has_ebook %}
+            {% if current_user.is_authenticated %}
+              <a href="{{ url_for('student.read_ebook', bid=book.id) }}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">
+                <i data-lucide="book-open"></i> Read
+              </a>
+            {% else %}
+              <a href="{{ url_for('auth.login') }}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">
+                <i data-lucide="book-open"></i> Read
+              </a>
+            {% endif %}
+          {% endif %}
+          {% if current_user.is_authenticated %}
+            <form method="POST" action="{{ url_for('student.toggle_wishlist', bid=book.id) }}" style="display:contents;">
+              <button class="btn btn-ghost btn-sm btn-icon" title="Wishlist"><i data-lucide="heart"></i></button>
+            </form>
+          {% endif %}
+          <a href="{{ url_for('books.book_detail', bid=book.id) }}" class="btn btn-ghost btn-sm btn-icon" title="Details">
+            <i data-lucide="info"></i>
+          </a>
+        </div>
+      </div>
+      {% else %}
+        <div style="grid-column:1/-1;" class="glass empty-state">
+          <i data-lucide="search-x"></i>
+          <h4>No books found</h4>
+          <p>{% if q %}Try different keywords or browse all categories{% else %}No books in catalog yet{% endif %}</p>
+          {% if q %}<a href="{{ url_for('books.catalog') }}" class="btn btn-primary" style="margin-top:16px;">Clear Search</a>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- ── Pagination ── -->
+    {% if paginated.pages > 1 %}
+    <div class="pagination">
+      {% if paginated.has_prev %}
+        <a href="?q={{ q }}&category={{ category_id }}&page={{ paginated.prev_num }}" class="page-btn"><i data-lucide="chevron-left"></i></a>
+      {% endif %}
+      {% for p in paginated.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          <a href="?q={{ q }}&category={{ category_id }}&page={{ p }}" class="page-btn {% if p == page %}active{% endif %}">{{ p }}</a>
+        {% else %}
+          <span style="color:var(--text-muted);padding:0 8px;">…</span>
+        {% endif %}
+      {% endfor %}
+      {% if paginated.has_next %}
+        <a href="?q={{ q }}&category={{ category_id }}&page={{ paginated.next_num }}" class="page-btn"><i data-lucide="chevron-right"></i></a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+
+<div id="flash-container" style="position:fixed;top:80px;right:24px;z-index:999;max-width:340px;"></div>
+
+{% endblock %}

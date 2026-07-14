@@ -1,0 +1,175 @@
+{% extends 'shared/base.html' %}
+{% block title %}{{ book.title }}{% endblock %}
+{% block body %}
+
+<!-- ── Catalog Navbar ── -->
+<div class="catalog-nav">
+  <a href="{{ url_for('landing.index') }}" style="display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;">
+    <i data-lucide="book-open" style="color:var(--accent-primary);"></i> EduLib
+  </a>
+  <span style="color:var(--glass-border);">/</span>
+  <a href="{{ url_for('books.catalog') }}" style="font-size:14px;color:var(--text-secondary);text-decoration:none;">Catalog</a>
+  <span style="color:var(--glass-border);">/</span>
+  <span style="font-size:14px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;">{{ book.title }}</span>
+
+  <div style="margin-left:auto;display:flex;gap:12px;align-items:center;">
+    <button id="theme-toggle" class="topbar-icon-btn" title="Toggle theme"><i data-lucide="sun"></i></button>
+    {% if current_user.is_authenticated %}
+      {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-sm">Dashboard</a>
+      {% elif current_user.role == 'teacher' %}
+        <a href="{{ url_for('teacher.dashboard') }}" class="btn btn-primary btn-sm">Dashboard</a>
+      {% else %}
+        <a href="{{ url_for('student.dashboard') }}" class="btn btn-primary btn-sm">Dashboard</a>
+      {% endif %}
+    {% else %}
+      <a href="{{ url_for('auth.login') }}" class="btn btn-ghost btn-sm">Login</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Join Free</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="catalog-content">
+  <a href="javascript:history.back()" style="display:inline-flex;align-items:center;gap:8px;margin-bottom:24px;color:var(--text-secondary);text-decoration:none;font-size:14px;transition:var(--transition);padding:8px 16px;border-radius:99px;background:var(--glass-bg);border:1px solid var(--glass-border);">
+    <i data-lucide="arrow-left" style="width:16px;height:16px;"></i> Back
+  </a>
+
+  <div class="glass" style="padding:32px;border-radius:var(--radius-xl);display:grid;grid-template-columns:300px 1fr;gap:40px;align-items:start;">
+    <!-- Cover -->
+    <div style="position:relative;">
+      {% if book.cover_url and book.cover_url != '/static/images/default_book.png' %}
+        <img src="{{ book.cover_url }}" alt="{{ book.title }}" style="width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:var(--radius-lg);box-shadow:var(--glass-shadow);border:1px solid var(--glass-border);">
+      {% else %}
+        <div class="book-cover-placeholder" style="border-radius:var(--radius-lg);box-shadow:var(--glass-shadow);border:1px solid var(--glass-border);">
+          <i data-lucide="book" style="width:64px;height:64px;"></i>
+        </div>
+      {% endif %}
+      
+      {% if book.has_ebook %}
+        <div style="position:absolute;top:16px;right:16px;">
+          <span class="badge badge-info" style="backdrop-filter:blur(8px);background:rgba(6,182,212,0.8);color:#fff;border:none;"><i data-lucide="file-text"></i> PDF</span>
+        </div>
+      {% endif %}
+    
+      <!-- QR Code for Scanner -->
+      <div style="margin-top:24px; text-align:center;">
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em; font-weight:600;">Scan to Check In/Out</p>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ url_for('books.book_detail', bid=book.id, _external=True) }}" alt="Book QR Code" style="border-radius:var(--radius-md); border:1px solid var(--glass-border); padding: 8px; background: white; display:inline-block;">
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div>
+      <h1 style="font-family:'Space Grotesk',sans-serif;font-size:36px;font-weight:700;margin-bottom:8px;line-height:1.2;">{{ book.title }}</h1>
+      <p style="font-size:18px;color:var(--text-secondary);margin-bottom:24px;">by <strong style="color:var(--text-primary);">{{ book.author }}</strong></p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--glass-border);">
+        {% if book.category %}
+          <span class="badge badge-primary">{{ book.category.name }}</span>
+        {% endif %}
+        {% if book.pages %}
+          <span class="badge" style="background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);color:var(--text-secondary);">
+            <i data-lucide="layers" style="width:14px;height:14px;"></i> {{ book.pages }} pages
+          </span>
+        {% endif %}
+        {% if book.language %}
+          <span class="badge" style="background:rgba(255,255,255,0.05);border:1px solid var(--glass-border);color:var(--text-secondary);">
+            <i data-lucide="globe" style="width:14px;height:14px;"></i> {{ book.language }}
+          </span>
+        {% endif %}
+        <span class="badge {% if book.is_available %}badge-success{% else %}badge-danger{% endif %}">
+          {% if book.is_available %}
+            <i data-lucide="check-circle" style="width:14px;height:14px;"></i> {{ book.copies_available }} Available
+          {% else %}
+            <i data-lucide="x-circle" style="width:14px;height:14px;"></i> Currently Unavailable
+          {% endif %}
+        </span>
+      </div>
+
+      {% if book.description %}
+      <div style="margin-bottom:32px;">
+        <h3 style="font-family:'Space Grotesk',sans-serif;font-size:18px;margin-bottom:12px;">About this book</h3>
+        <p style="font-size:15px;line-height:1.8;color:var(--text-muted);white-space:pre-wrap;">{{ book.description }}</p>
+      </div>
+      {% endif %}
+
+      {% if book.publisher or book.published_year %}
+      <div style="padding:16px;background:rgba(255,255,255,0.02);border:1px solid var(--glass-border);border-radius:var(--radius-md);margin-bottom:32px;display:inline-flex;gap:32px;">
+        {% if book.publisher %}
+        <div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Publisher</div>
+          <div style="font-size:14px;font-weight:500;">{{ book.publisher }}</div>
+        </div>
+        {% endif %}
+        {% if book.published_year %}
+        <div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Year</div>
+          <div style="font-size:14px;font-weight:500;">{{ book.published_year }}</div>
+        </div>
+        {% endif %}
+        {% if book.isbn %}
+        <div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">ISBN</div>
+          <div style="font-size:14px;font-weight:500;font-family:'JetBrains Mono',monospace;">{{ book.isbn }}</div>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        {% if current_user.is_authenticated %}
+          {% if current_user.role == 'student' %}
+            {% if book.is_available %}
+              <form method="POST" action="{{ url_for('student.borrow_book', bid=book.id) }}">
+                <button type="submit" class="btn btn-primary btn-lg"><i data-lucide="handshake"></i> Request Borrow</button>
+              </form>
+            {% else %}
+              <button class="btn btn-ghost btn-lg" disabled style="opacity:0.5;cursor:not-allowed;"><i data-lucide="x-circle"></i> Unavailable</button>
+            {% endif %}
+            <form method="POST" action="{{ url_for('student.toggle_wishlist', bid=book.id) }}">
+              <button type="submit" class="btn btn-ghost btn-lg"><i data-lucide="heart"></i> Add to Wishlist</button>
+            </form>
+          {% endif %}
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg"><i data-lucide="log-in"></i> Login to Borrow</a>
+        {% endif %}
+
+        {% if book.has_ebook %}
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('student.read_ebook', bid=book.id) }}" class="btn btn-success btn-lg">
+              <i data-lucide="book-open"></i> Read Online Free
+            </a>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn btn-success btn-lg">
+              <i data-lucide="book-open"></i> Read Online Free
+            </a>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="flash-container" style="position:fixed;top:88px;right:24px;z-index:999;max-width:340px;">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="alert alert-{{ category }}" style="margin-bottom:16px;position:relative;">
+        {{ message }}
+        <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
+      </div>
+    {% endfor %}
+  {% endwith %}
+</div>
+
+
+
+<style>
+@media (max-width:768px) {
+  .catalog-content > .glass { grid-template-columns:1fr; gap:24px; }
+  .catalog-content .book-cover-placeholder, .catalog-content img { max-width:260px; margin:0 auto; display:block; }
+  .catalog-nav { display:none; } /* Hide on small screens, users will navigate back */
+  .catalog-content { padding: 16px; }
+}
+</style>
+
+{% endblock %}

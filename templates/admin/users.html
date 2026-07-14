@@ -1,0 +1,81 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Manage Users{% endblock %}
+{% block page_title %}User Management{% endblock %}
+
+{% block content %}
+<div style="display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center;">
+  <form method="GET" style="display:flex;gap:.5rem;flex:1;max-width:400px;" class="search-box">
+    <i data-lucide="search"></i>
+    <input type="text" name="q" value="{{ q }}" placeholder="Search users…" style="background:transparent;border:none;color:var(--text);flex:1;">
+    <input type="hidden" name="role" value="{{ role_filter }}">
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  </form>
+  <div style="display:flex;gap:.5rem;">
+    {% for r, label in [('','All'),('student','Students'),('teacher','Teachers'),('admin','Admins')] %}
+    <a href="{{ url_for('admin.users', role=r) }}" class="btn btn-sm {% if role_filter == r %}btn-primary{% else %}btn-ghost{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+  <a href="{{ url_for('admin.add_user') }}" class="btn btn-primary btn-sm" style="margin-left:auto;"><i data-lucide="user-plus"></i> Add User</a>
+</div>
+
+<div class="glass">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>User</th><th>Role</th><th>Department/ID</th><th>Joined</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for user in users.items %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              <div class="avatar avatar-sm">{{ user.display_name[0].upper() }}</div>
+              <div>
+                <div style="font-weight:600;font-size:.875rem;">{{ user.display_name }}</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">{{ user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <span class="badge {% if user.role == 'admin' %}badge-danger{% elif user.role == 'teacher' %}badge-warning{% else %}badge-primary{% endif %}">
+              {{ user.role }}
+            </span>
+          </td>
+          <td style="font-size:.82rem;color:var(--text-muted);">
+            {{ user.department or user.student_id or user.employee_id or '—' }}
+          </td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ format_date(user.created_at) }}</td>
+          <td>
+            <span class="badge {% if user.is_active %}badge-success{% else %}badge-danger{% endif %}">
+              {% if user.is_active %}Active{% else %}Disabled{% endif %}
+            </span>
+          </td>
+          <td>
+            {% if user.id != current_user.id %}
+            <a href="{{ url_for('admin.toggle_user', uid=user.id) }}"
+               class="btn btn-sm {% if user.is_active %}btn-danger{% else %}btn-success{% endif %}"
+               data-confirm="{% if user.is_active %}Deactivate{% else %}Activate{% endif %} {{ user.username }}?">
+              {% if user.is_active %}<i data-lucide="user-slash"></i>{% else %}<i data-lucide="user-check"></i>{% endif %}
+            </a>
+            {% else %}
+              <span style="color:var(--text-muted);font-size:.78rem;">You</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty-state"><i data-lucide="users"></i><p>No users found</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if users.pages > 1 %}
+  <div class="pagination">
+    {% for p in users.iter_pages() %}
+      {% if p %}
+        <a href="?q={{ q }}&role={{ role_filter }}&page={{ p }}" class="page-btn {% if p == users.page %}active{% endif %}">{{ p }}</a>
+      {% else %}<span>…</span>{% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

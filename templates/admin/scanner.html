@@ -1,0 +1,37 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Book Scanner{% endblock %}
+{% block page_title %}QR Code Scanner{% endblock %}
+
+{% block content %}
+<div class="glass" style="padding:2rem; max-width:600px; margin:0 auto; text-align:center;">
+  <i data-lucide="scan-line" style="width:48px; height:48px; margin-bottom:1rem; color:var(--accent-primary);"></i>
+  <h2 style="font-family:'Space Grotesk',sans-serif; margin-bottom:1rem;">Scan Book QR Code</h2>
+  <p style="color:var(--text-muted); margin-bottom:2rem;">Point your camera at the book's QR code to instantly view details and manage borrows.</p>
+
+  <div id="reader" style="width:100%; border-radius:12px; overflow:hidden; border:2px solid var(--glass-border); background:#000;"></div>
+  <div id="result" style="margin-top:1.5rem; font-weight:600; color:var(--success);"></div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script>
+  function onScanSuccess(decodedText, decodedResult) {
+    // Ensure the decoded text is a relative or absolute URL to our app
+    if (decodedText.includes('/book/')) {
+        document.getElementById('result').innerText = "Book found! Redirecting...";
+        window.location.href = decodedText;
+    } else {
+        document.getElementById('result').innerText = `Scanned: ${decodedText} (Invalid book QR)`;
+    }
+  }
+
+  function onScanFailure(error) {
+    // Keep scanning quietly
+  }
+
+  let html5QrcodeScanner = new Html5QrcodeScanner(
+    "reader",
+    { fps: 10, qrbox: {width: 250, height: 250} },
+    false);
+  html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+</script>
+{% endblock %}

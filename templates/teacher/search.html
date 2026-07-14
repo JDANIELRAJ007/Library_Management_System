@@ -1,0 +1,76 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Search Books — Teacher{% endblock %}
+{% block page_title %}Search Library Catalog{% endblock %}
+
+{% block content %}
+<div class="glass" style="padding:1.25rem;margin-bottom:1.5rem;">
+  <form method="GET" action="{{ url_for('teacher.search_books') }}">
+    <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+      <div style="flex:1;min-width:200px;" class="search-box">
+        <i data-lucide="search"></i>
+        <input type="text" name="q" value="{{ q }}" placeholder="Search by title, author, ISBN…"
+               style="background:transparent;border:none;color:var(--text);width:100%;padding:.35rem;">
+      </div>
+      <button type="submit" class="btn btn-primary"><i data-lucide="search"></i> Search</button>
+    </div>
+  </form>
+</div>
+
+{% if q %}
+<p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1rem;">
+  <strong style="color:var(--text);">{{ total }}</strong> results for "{{ q }}"
+</p>
+{% else %}
+<p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1rem;">
+  Showing all <strong style="color:var(--text);">{{ total }}</strong> books in the library
+</p>
+{% endif %}
+
+{% if books.items %}
+<div class="grid-books grid">
+  {% for book in books.items %}
+  <div class="book-card glass glass-hover">
+    {% if book.cover_url and book.cover_url != '/static/images/default_book.png' %}
+      <img src="{{ book.cover_url }}" alt="{{ book.title }}" class="book-cover">
+    {% else %}
+      <div class="book-cover-placeholder"><i data-lucide="book" style="color:rgba(255,255,255,.4);"></i></div>
+    {% endif %}
+    <div class="book-meta">
+      <div class="book-title">{{ book.title }}</div>
+      <div class="book-author">{{ book.author }}</div>
+      {% if book.category %}<span class="badge badge-primary" style="font-size:.6rem;margin-top:.2rem;">{{ book.category.name }}</span>{% endif %}
+      <div style="margin-top:auto;padding-top:.5rem;">
+        {% if book.is_available %}
+          <span class="badge badge-success">{{ book.copies_available }} available</span>
+        {% else %}
+          <span class="badge badge-danger">Unavailable</span>
+        {% endif %}
+        {% if book.has_ebook %}
+          <span class="badge badge-info" style="font-size:.6rem;margin-left:.25rem;">PDF</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="book-actions">
+      {% if book.has_ebook %}
+        <a href="{{ url_for('student.read_ebook', bid=book.id) }}" class="btn btn-success btn-sm" style="flex:1;justify-content:center;">
+          <i data-lucide="book-open-check"></i> Read
+        </a>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% if books.pages > 1 %}
+<div class="pagination" style="margin-top:2rem;">
+  {% if books.has_prev %}<a href="?q={{ q }}&page={{ books.prev_num }}" class="page-btn"><i data-lucide="chevron-left"></i></a>{% endif %}
+  <span style="color:var(--text-muted);font-size:.875rem;">Page {{ books.page }} of {{ books.pages }}</span>
+  {% if books.has_next %}<a href="?q={{ q }}&page={{ books.next_num }}" class="page-btn"><i data-lucide="chevron-right"></i></a>{% endif %}
+</div>
+{% endif %}
+{% else %}
+<div class="empty-state glass" style="padding:4rem;">
+  <i data-lucide="search"></i>
+  <h4>No books found{% if q %} for "{{ q }}"{% endif %}</h4>
+</div>
+{% endif %}
+{% endblock %}

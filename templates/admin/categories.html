@@ -1,0 +1,45 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Categories{% endblock %}
+{% block page_title %}Book Categories{% endblock %}
+
+{% block content %}
+<div class="grid grid-2" style="align-items:start;">
+  <!-- Add Form -->
+  <div class="glass" style="padding:1.5rem;">
+    <h3 style="font-size:1rem;margin-bottom:1rem;">➕ Add Category</h3>
+    <form method="POST" action="{{ url_for('admin.categories') }}">
+      <div class="form-group"><label class="form-label">Name *</label><input type="text" name="name" class="form-control" required></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea name="description" class="form-control" rows="2"></textarea></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+        <div class="form-group">
+          <label class="form-label">Icon (FontAwesome class)</label>
+          <input type="text" name="icon" class="form-control" value="fa-book" placeholder="fa-book">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color</label>
+          <input type="color" name="color" class="form-control" value="#6366f1" style="height:42px;padding:.25rem;">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary"><i data-lucide="plus"></i> Add Category</button>
+    </form>
+  </div>
+
+  <!-- Existing Categories -->
+  <div class="glass" style="padding:1.5rem;">
+    <h3 style="font-size:1rem;margin-bottom:1rem;">📚 Existing Categories ({{ categories|length }})</h3>
+    {% for cat in categories %}
+    <div style="display:flex;align-items:center;gap:.75rem;padding:.75rem;border-radius:var(--radius-sm);background:rgba(255,255,255,.03);margin-bottom:.5rem;">
+      <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:{{ cat.color }}22;flex-shrink:0;">
+        <i data-lucide="{{ cat.icon }}" style="color:{{ cat.color }};font-size:.9rem;"></i>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:.875rem;font-weight:600;">{{ cat.name }}</div>
+        <div style="font-size:.75rem;color:var(--text-muted);">{{ cat.books.count() }} books</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state"><i data-lucide="tag"></i><p>No categories yet</p></div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Manage Books{% endblock %}
+{% block page_title %}Book Management{% endblock %}
+
+{% block content %}
+<div style="display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;align-items:center;">
+  <form method="GET" style="display:flex;gap:.5rem;flex:1;max-width:400px;" class="search-box">
+    <i data-lucide="search"></i>
+    <input type="text" name="q" value="{{ q }}" placeholder="Search books…" style="background:transparent;border:none;color:var(--text);flex:1;">
+    <button type="submit" class="btn btn-primary btn-sm">Search</button>
+  </form>
+  <select name="category" class="form-select" style="width:auto;" onchange="this.form.submit()" form="filter-form">
+    <option value="">All Categories</option>
+    {% for c in categories %}<option value="{{ c.id }}" {% if cat == c.id %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+  </select>
+  <form id="filter-form" method="GET" style="display:none;"><input type="hidden" name="q" value="{{ q }}"></form>
+  <a href="{{ url_for('admin.add_book') }}" class="btn btn-primary btn-sm" style="margin-left:auto;"><i data-lucide="plus"></i> Add Book</a>
+</div>
+
+<div class="glass">
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr><th>Book</th><th>Author</th><th>Category</th><th>Copies</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for book in books.items %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              {% if book.cover_url and book.cover_url != '/static/images/default_book.png' %}
+                <img src="{{ book.cover_url }}" alt="" style="width:34px;height:46px;object-fit:cover;border-radius:4px;flex-shrink:0;">
+              {% else %}
+                <div style="width:34px;height:46px;background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">
+                  <i data-lucide="book" style="font-size:.7rem;color:rgba(255,255,255,.3);"></i>
+                </div>
+              {% endif %}
+              <div>
+                <div style="font-weight:600;font-size:.875rem;">{{ book.title }}</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">ISBN: {{ book.isbn or '—' }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-size:.85rem;">{{ book.author }}</td>
+          <td>{% if book.category %}<span class="badge badge-primary">{{ book.category.name }}</span>{% else %}—{% endif %}</td>
+          <td style="font-size:.85rem;">{{ book.copies_available }}/{{ book.copies_total }}</td>
+          <td>
+            {% if book.is_available %}<span class="badge badge-success">Available</span>
+            {% else %}<span class="badge badge-danger">Out</span>{% endif %}
+            {% if book.has_ebook %}<span class="badge badge-info" style="margin-left:.3rem;">E-Book</span>{% endif %}
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('admin.delete_book', bid=book.id) }}" style="display:inline;"
+                  data-confirm="Delete '{{ book.title }}'? This cannot be undone.">
+              <button class="btn btn-danger btn-sm"><i data-lucide="trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty-state"><i data-lucide="book"></i><p>No books found</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if books.pages > 1 %}
+  <div class="pagination">
+    {% for p in books.iter_pages() %}
+      {% if p %}
+        <a href="?q={{ q }}&category={{ cat }}&page={{ p }}" class="page-btn {% if p == books.page %}active{% endif %}">{{ p }}</a>
+      {% else %}<span>…</span>{% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

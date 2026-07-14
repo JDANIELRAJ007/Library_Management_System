@@ -1,0 +1,21 @@
+{% extends 'shared/base.html' %}
+{% block title %}Books - EduLib{% endblock %}
+
+{% block content %}
+<div class="container mt-5" data-aos="fade-up">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i data-lucide="books text-primary me-2"></i>Library Catalog</h2>
+        <div class="glass-card p-2" style="width: 300px;">
+            <input class="form-control border-0 bg-transparent text-light" type="search" placeholder="Search books..." style="box-shadow: none;">
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-12 text-center text-secondary py-5">
+            <i data-lucide="search 3x mb-3 text-muted"></i>
+            <h4>No books available yet.</h4>
+            <p>Admin needs to add some books to the catalog.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

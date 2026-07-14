@@ -1,0 +1,61 @@
+{% extends 'shared/dashboard_layout.html' %}
+{% block title %}Borrow Requests{% endblock %}
+{% block page_title %}Borrow Requests{% endblock %}
+
+{% block content %}
+<div style="display:flex;gap:.75rem;margin-bottom:1.25rem;flex-wrap:wrap;">
+  {% for s, label in [('requested','⏳ Pending'),('borrowed','📚 Borrowed'),('returned','✅ Returned'),('rejected','❌ Rejected')] %}
+  <a href="{{ url_for('teacher.requests', status=s) }}" class="btn {% if status == s %}btn-primary{% else %}btn-ghost{% endif %} btn-sm">{{ label }}</a>
+  {% endfor %}
+</div>
+<div class="glass">
+  <div class="table-wrapper">
+    <table>
+      <thead><tr><th>Student</th><th>Book</th><th>Requested</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for r in records.items %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:.6rem;">
+              <div class="avatar avatar-sm">{{ r.user.display_name[0].upper() }}</div>
+              <div>
+                <div style="font-weight:600;font-size:.85rem;">{{ r.user.display_name }}</div>
+                <div style="font-size:.75rem;color:var(--text-muted);">{{ r.user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="font-weight:600;font-size:.85rem;">{{ r.book.title }}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">{{ r.book.author }}</div>
+          </td>
+          <td style="font-size:.82rem;color:var(--text-muted);">{{ time_ago(r.created_at) }}</td>
+          <td style="font-size:.82rem;">{% if r.due_date %}{{ format_date(r.due_date) }}{% else %}—{% endif %}</td>
+          <td>
+            {% if r.status == 'borrowed' and r.is_overdue %}<span class="badge badge-danger">Overdue</span>
+            {% elif r.status == 'borrowed' %}<span class="badge badge-primary">Borrowed</span>
+            {% elif r.status == 'returned' %}<span class="badge badge-success">Returned</span>
+            {% elif r.status == 'requested' %}<span class="badge badge-warning">Pending</span>
+            {% elif r.status == 'rejected' %}<span class="badge badge-danger">Rejected</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if r.status == 'requested' %}
+            <div style="display:flex;gap:.4rem;">
+              <form method="POST" action="{{ url_for('teacher.approve_request', rid=r.id) }}">
+                <button class="btn btn-success btn-sm"><i data-lucide="check"></i></button>
+              </form>
+              <form method="POST" action="{{ url_for('teacher.reject_request', rid=r.id) }}">
+                <button class="btn btn-danger btn-sm"><i data-lucide="x"></i></button>
+              </form>
+            </div>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6"><div class="empty-state"><i data-lucide="inbox"></i><p>No records</p></div></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
